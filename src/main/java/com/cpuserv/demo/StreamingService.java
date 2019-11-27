@@ -19,23 +19,17 @@ import oshi.hardware.CentralProcessor;
 
 @Service
 public class StreamingService {
-
+    
     private static byte[] byteImage;
 
-    public String getCpuLoad() {
-        SystemInfo si = new SystemInfo();
-        CentralProcessor processor = si.getHardware().getProcessor();
+    private double cpuLoad;
 
-        return String.format("%.2f%%", processor.getSystemCpuLoad() * 100);
+    public double getCpuLoad() {
+        return cpuLoad;
     }
 
     public byte[] getBytedImage() {
-        return byteImage;
-    }
-    
-    @Scheduled(fixedRate = 2000)
-    public void updateBytedImage() {
-        String text = getCpuLoad();
+        String text = String.format("%.2f%%", getCpuLoad());
 
         BufferedImage img = new BufferedImage(1,1, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
@@ -72,5 +66,14 @@ public class StreamingService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return byteImage;
+    }
+    
+    @Scheduled(fixedRate = 2000)
+    public void updateCpuLoad() {
+        SystemInfo si = new SystemInfo();
+        CentralProcessor processor = si.getHardware().getProcessor();
+        cpuLoad = processor.getSystemCpuLoad() * 100;        
     }
 }

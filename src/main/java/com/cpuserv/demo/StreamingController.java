@@ -41,8 +41,11 @@ public class StreamingController {
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public void getStream(HttpServletResponse response) {
         response.setContentType("multipart/x-mixed-replace; boundary=--BoundaryString\r\n");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+        response.setDateHeader("Expires", 0);
         
-        Queue queue = new Queue(UUID.randomUUID().toString(), true, false, false);
+        Queue queue = new Queue(UUID.randomUUID().toString(), true, true, false);
         Binding binding = BindingBuilder.bind(queue).to(exchange);
         admin.declareQueue(queue);
         admin.declareBinding(binding);
@@ -53,6 +56,12 @@ public class StreamingController {
                 
             while(true) {
                 byte[] imageData = streamService.getBytedImage();
+                Double load = streamService.getCpuLoad();
+
+                if (load.compareTo(70.0) > 0) {
+                    template.convertAndSend(exchange.getName(), "", "alert");
+                    log.info("Send message to exchange: " + exchange.getName());
+                }
 
                 outStream.write((
                 "--BoundaryString\r\n" + 
