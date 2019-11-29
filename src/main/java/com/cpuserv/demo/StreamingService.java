@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class StreamingService {
-
+    
     private static byte[] byteImage;
 
     public byte[] getBytedImage(double load) {
