@@ -11,31 +11,15 @@ import java.awt.RenderingHints;
 
 import javax.imageio.ImageIO;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
 
 @Service
 public class StreamingService {
 
     private static byte[] byteImage;
 
-    public String getCpuLoad() {
-        SystemInfo si = new SystemInfo();
-        CentralProcessor processor = si.getHardware().getProcessor();
-
-        return String.format("%.2f%%", processor.getSystemCpuLoad() * 100);
-    }
-
-    public byte[] getBytedImage() {
-        return byteImage;
-    }
-    
-    @Scheduled(fixedRate = 2000)
-    public void updateBytedImage() {
-        String text = getCpuLoad();
+    public byte[] getBytedImage(double load) {
+        String text = String.format("%.2f%%", load);
 
         BufferedImage img = new BufferedImage(1,1, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
@@ -72,5 +56,7 @@ public class StreamingService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return byteImage;
     }
 }
